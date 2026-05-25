@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>imp.cx — Solana Trading Bot</title>
+    <meta name="description" content="Copy trade the best Solana wallets. Buy, sell, and track tokens via Telegram.">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        canvas#particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        .content { position: relative; z-index: 1; }
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto;
+        }
+        .logo { font-size: 1.8rem; font-weight: 800; color: #fff; }
+        .logo span { color: #9945FF; }
+        .nav-links a {
+            color: #9ca3af; text-decoration: none; margin-left: 2rem;
+            font-size: 0.9rem; transition: color 0.2s;
+        }
+        .nav-links a:hover { color: #fff; }
+        .btn {
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            color: #000; padding: 0.8rem 2rem; border-radius: 8px;
+            text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-block;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px #9945FF44; }
+        .btn-outline {
+            background: transparent; border: 1px solid #333;
+            color: #e0e0e0; padding: 0.8rem 2rem; border-radius: 8px;
+            text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            margin-left: 1rem;
+        }
+        .hero {
+            text-align: center; padding: 6rem 2rem 4rem; max-width: 800px; margin: 0 auto;
+        }
+        .hero h1 { font-size: 3.5rem; font-weight: 800; color: #fff; margin-bottom: 1.5rem; }
+        .hero h1 span { background: linear-gradient(135deg, #9945FF, #14F195); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.2rem; color: #9ca3af; margin-bottom: 2.5rem; max-width: 600px; margin: 0 auto 2.5rem; }
+        .hero-buttons { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .stats {
+            display: flex; justify-content: center; gap: 4rem; padding: 3rem 2rem;
+            max-width: 800px; margin: 0 auto;
+        }
+        .stat { text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: #fff; }
+        .stat-label { font-size: 0.85rem; color: #6b7280; margin-top: 0.3rem; }
+        .features {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem; max-width: 1000px; margin: 4rem auto; padding: 0 2rem;
+        }
+        .feature {
+            background: #111118; border: 1px solid #1f1f2e; border-radius: 12px;
+            padding: 2rem; transition: border-color 0.2s;
+        }
+        .feature:hover { border-color: #9945FF44; }
+        .feature-icon { font-size: 2rem; margin-bottom: 1rem; }
+        .feature h3 { color: #fff; margin-bottom: 0.5rem; font-size: 1.1rem; }
+        .feature p { color: #6b7280; font-size: 0.9rem; }
+        .cta {
+            text-align: center; padding: 4rem 2rem; max-width: 600px; margin: 0 auto;
+        }
+        .cta h2 { color: #fff; font-size: 2rem; margin-bottom: 1rem; }
+        .cta p { color: #6b7280; margin-bottom: 2rem; }
+        .fee-tiers {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 1rem; max-width: 800px; margin: 3rem auto; padding: 0 2rem;
+        }
+        .tier {
+            background: #111118; border: 1px solid #1f1f2e; border-radius: 12px;
+            padding: 1.5rem; text-align: center;
+        }
+        .tier.highlight { border-color: #9945FF; }
+        .tier-name { color: #6b7280; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .tier-fee { color: #fff; font-size: 2rem; font-weight: 700; margin: 0.5rem 0; }
+        .tier-vol { color: #6b7280; font-size: 0.8rem; }
+        footer {
+            text-align: center; padding: 3rem 2rem; color: #484f58; font-size: 0.8rem;
+            border-top: 1px solid #1f1f2e; max-width: 1200px; margin: 2rem auto 0;
+        }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .stats { gap: 2rem; }
+            .fee-tiers { grid-template-columns: repeat(2, 1fr); }
+            .nav-links a { margin-left: 1rem; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particles"></canvas>
+    <div class="content">
+        <nav>
+            <div class="logo">imp<span>.cx</span></div>
+            <div class="nav-links">
+                <a href="https://t.me/impcx_bot">Telegram Bot</a>
+                <a href="https://github.com/LIONBABYCRYPTO/imp-cx-bot">GitHub</a>
+                <a href="/app">Dashboard</a>
+            </div>
+        </nav>
+
+        <section class="hero">
+            <h1>Trade Solana.<br>Copy the <span>best wallets.</span></h1>
+            <p>Non-custodial Telegram bot for buying, selling, and copy trading any token on Solana. Zero KYC. Instant swaps via Jupiter.</p>
+            <div class="hero-buttons">
+                <a href="https://t.me/impcx_bot" class="btn">🚀 Launch Bot</a>
+                <a href="https://github.com/LIONBABYCRYPTO/imp-cx-bot" class="btn-outline">🐙 GitHub</a>
+            </div>
+        </section>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">0.5%</div>
+                <div class="stat-label">Fee Per Trade</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">Solana</div>
+                <div class="stat-label">Blockchain</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">20%</div>
+                <div class="stat-label">Referral Reward</div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Instant Swaps</h3>
+                <p>Buy and sell any SPL token instantly via Jupiter DEX aggregation. Best route execution.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">👤</div>
+                <h3>Copy Trading</h3>
+                <p>Follow and automatically mirror trades from profitable wallets. Set limits and risk controls.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔐</div>
+                <h3>Non-Custodial</h3>
+                <p>Your keys, your coins. Private keys encrypted at rest. We never access your funds.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <h3>Web Dashboard</h3>
+                <p>Track positions, P&L, and trade history. Manage everything from your browser.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <h3>Referral Program</h3>
+                <p>Earn 20% of all fees from users you refer. Passive income while you trade.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🛡️</div>
+                <h3>MEV Protection</h3>
+                <p>Jito integration protects your trades from frontrunning and sandwich attacks.</p>
+            </div>
+        </div>
+
+        <h2 style="text-align:center;color:#fff;font-size:1.5rem;margin-top:2rem">Fee Tiers</h2>
+        <div class="fee-tiers">
+            <div class="tier">
+                <div class="tier-name">Standard</div>
+                <div class="tier-fee">0.5%</div>
+                <div class="tier-vol">Up to $10K</div>
+            </div>
+            <div class="tier highlight">
+                <div class="tier-name">Silver</div>
+                <div class="tier-fee">0.4%</div>
+                <div class="tier-vol">$10K - $100K</div>
+            </div>
+            <div class="tier">
+                <div class="tier-name">Gold</div>
+                <div class="tier-fee">0.3%</div>
+                <div class="tier-vol">$100K - $1M</div>
+            </div>
+            <div class="tier">
+                <div class="tier-name">Platinum</div>
+                <div class="tier-fee">0.2%</div>
+                <div class="tier-vol">$1M+</div>
+            </div>
+        </div>
+
+        <section class="cta">
+            <h2>Ready to trade?</h2>
+            <p>Start in 30 seconds. No KYC, no email, no BS.</p>
+            <a href="https://t.me/impcx_bot" class="btn">🚀 Open Telegram Bot</a>
+        </section>
+
+        <footer>
+            <p>🐾 imp.cx — Built on Solana. Powered by Jupiter.</p>
+            <p style="margin-top:0.3rem">© 2026 · Not financial advice · Trade at your own risk</p>
+        </footer>
+    </div>
+
+    <script>
+        // Particle background
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = Array.from({ length: 50 }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5,
+        }));
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                ctx.fillStyle = '#9945FF44';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
