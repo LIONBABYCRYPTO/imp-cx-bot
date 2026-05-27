@@ -1,0 +1,17 @@
+name: Test Self-Hosted Runner
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: [self-hosted, macos]
+    steps:
+      - uses: actions/checkout@v4
+      - name: System Info
+        run: |
+          echo "=== Mac Mini Specs ==="
+          sw_vers
+          python3 --version
+          node --version
+          echo ""
+          echo "Runner is working! 🚀"
